@@ -10,7 +10,6 @@ require_once 'mediauploader.php';
 require_once 'keystream.class.php';
 require_once 'tokenmap.class.php';
 require_once 'events/WhatsApiEventsManager.php';
-require_once 'SqliteMessageStore.php';
 
 class SyncResult
 {
@@ -61,7 +60,6 @@ class WhatsProt
     protected $serverReceivedId;        // Confirm that the *server* has received your command.
     protected $socket;                  // A socket to connect to the WhatsApp network.
     protected $writer;                  // An instance of the BinaryTreeNodeWriter class.
-    protected $messageStore;
     protected $nodeId = array();
     protected $loginTime;
     public    $reader;                  // An instance of the BinaryTreeNodeReader class.
@@ -1499,10 +1497,6 @@ class WhatsProt
         $id = $this->sendMessageNode($to, $bodyNode, $id);
         $this->waitForServer($id);
 
-        if ($this->messageStore !== null) {
-            $this->messageStore->saveMessage($this->phoneNumber, $to, $txt, $id, time());
-        }
-
         return $id;
     }
 
@@ -2376,11 +2370,6 @@ class WhatsProt
         return $id;
     }
 
-    public function setMessageStore(MessageStoreInterface $messageStore)
-    {
-        $this->messageStore = $messageStore;
-    }
-
     /**
      * Process number/jid and turn it into a JID if necessary
      *
@@ -2617,9 +2606,6 @@ class WhatsProt
                             $node->getChild("body")->getData()
                         ));
 
-                    if ($this->messageStore !== null) {
-                        $this->messageStore->saveMessage(ExtractNumber($node->getAttribute('from')), $this->phoneNumber, $node->getChild("body")->getData(), $node->getAttribute('id'), $node->getAttribute('t'));
-                    }
                 } else {
                     //group chat message
                     $this->eventManager()->fire("onGetGroupMessage",
@@ -2633,9 +2619,6 @@ class WhatsProt
                             $node->getAttribute("notify"),
                             $node->getChild("body")->getData()
                         ));
-                    if ($this->messageStore !== null) {
-                        $this->messageStore->saveMessage($author, $node->getAttribute('from'), $node->getChild("body")->getData(), $node->getAttribute('id'), $node->getAttribute('t'));
-                    }
                 }
 
             }
