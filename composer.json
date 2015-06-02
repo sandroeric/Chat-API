@@ -30,7 +30,6 @@
         "ext-gd" : "*",
         "ext-sockets" : "*",
         "ext-openssl" : "*",
-        "ext-pdo" : "*",
-        "ext-sqlite3" : "*"
+        "ext-pdo" : "*"
     }
 }
