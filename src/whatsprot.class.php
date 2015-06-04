@@ -1322,6 +1322,28 @@ class WhatsProt
 
         return $groupId;
     }
+    
+    /**
+     * Send a request to return a list of people participating in a specific
+     * group.
+     *
+     * @param  string $gjid The specific group id
+     */
+    public function sendGetGroupsParticipants($gjid)
+    {
+        $msgId = $this->createMsgId("getgroupparticipants");
+
+        $child = new ProtocolNode("list", null, null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $msgId,
+            "type" => "get",
+            "xmlns" => "w:g",
+            "to" => $this->getJID($gjid)
+                ), array($child), null);
+        $this->sendNode($node);
+
+        $this->waitForServer($msgId);
+    }
 
     /**
      * Change group's subject.
